@@ -29,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import com.example.geopet.R
 
 
 @Composable
@@ -39,6 +38,7 @@ fun BottomNavigationBar(navController: NavHostController) {
         AppScreens.Pantalla_Mascotas,
         AppScreens.Pantalla_Buscar,
         AppScreens.Pantalla_Perfil
+
     )
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()

@@ -31,17 +31,11 @@ class MainActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxSize(),
                 color = MaterialTheme.colorScheme.background
             ) {
-                AppNavigation(intentDestino)
+                GeoPetTheme {
+                    AppNavigation(intentDestino)
+                }
             }
         }
     }
 }
 
-@Composable
-@Preview
-fun MainPreview(){
-    GeoPetTheme {
-        AppNavigation()
-    }
-
-}

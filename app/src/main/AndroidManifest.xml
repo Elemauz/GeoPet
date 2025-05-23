@@ -13,6 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GeoPet"
         >
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value = "AIzaSyB3S_g1pxZVAi8NWMdrR5PGwX8HQ2n2t0o"
+        />
         <activity
             android:name=".MainActivity"
             android:exported="true"
