@@ -1,85 +1,90 @@
 package com.example.geopet.screens
+
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.geopet.CustomMapMarker
 import com.example.geopet.LocationUpdates
-import com.example.geopet.R
-import com.example.geopet.RenderPetMarkers
 import com.example.geopet.centerMapOnLocation
-import com.example.geopet.petMarkers
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
+import com.example.geopet.data.api.RetrofitInstance
+import com.example.geopet.data.model.Pet
+import com.example.geopet.utils.getBitmapDescriptorFromUrl
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapType
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.MarkerState
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.maps.android.compose.*
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun Pantalla_Inicio(navController: NavController){
+fun Pantalla_Inicio(navController: NavController) {
     Scaffold {
         Contenido_Pantalla_Inicio(navController)
     }
 }
 
 @Composable
-fun Contenido_Pantalla_Inicio(navController: NavController){
+fun Contenido_Pantalla_Inicio(navController: NavController) {
     val context = LocalContext.current
     val locationState by LocationUpdates(context)
     val cameraPositionState = rememberCameraPositionState()
-    val mapModifiers by remember { mutableStateOf(Modifier .fillMaxSize())}
-    val mapProperties by remember { mutableStateOf(MapProperties(mapType = MapType.NORMAL))}
-    val mapUIsettings by remember { mutableStateOf(MapUiSettings(zoomControlsEnabled = false))}
     val scope = rememberCoroutineScope()
+    var petList by remember { mutableStateOf<List<Pet>>(emptyList()) }
+    var markerIcons by remember { mutableStateOf<Map<Int, BitmapDescriptor>>(emptyMap()) }
 
+    // Cargar mascotas
+    LaunchedEffect(Unit) {
+        try {
+            val pets = RetrofitInstance.api.getPets()
+            petList = pets
+            val icons = mutableMapOf<Int, BitmapDescriptor>()
+            pets.forEach { pet ->
+                val url = "http://192.168.168.51:8000${pet.imagen_url}"
+                val descriptor = getBitmapDescriptorFromUrl(context, url)
+                icons[pet.id] = descriptor ?: BitmapDescriptorFactory.defaultMarker()
+            }
+            markerIcons = icons
+        } catch (e: Exception) {
+            Log.e("Pantalla_Inicio", "Error al obtener mascotas: ${e.localizedMessage}")
+        }
+    }
 
-    // Centrar la cámara cuando se actualice la ubicación
+    // Centrar mapa
     LaunchedEffect(locationState) {
         locationState?.let {
             centerMapOnLocation(it, cameraPositionState, scope)
         }
     }
-    Box(
-        modifier = Modifier.fillMaxSize(),
 
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         GoogleMap(
-            modifier = mapModifiers,
-            properties = mapProperties,
-            uiSettings = mapUIsettings,
+            modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-
+            properties = MapProperties(mapType = MapType.NORMAL),
+            uiSettings = MapUiSettings(zoomControlsEnabled = false)
         ) {
             locationState?.let { location ->
-                RenderPetMarkers(petMarkers) { }
                 Marker(
                     state = MarkerState(position = LatLng(location.latitude, location.longitude)),
                     title = "Ubicación actual"
+                )
+            }
 
+            // Renderizar marcadores de mascotas con íconos
+            for (pet in petList) {
+                val position = LatLng(pet.lat, pet.lon)
+                val icon = markerIcons[pet.id] ?: BitmapDescriptorFactory.defaultMarker()
+                Marker(
+                    state = MarkerState(position = position),
+                    title = pet.nombre,
+                    icon = icon
                 )
             }
         }
     }
-
 }

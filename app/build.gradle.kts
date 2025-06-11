@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
 }
 
 android {
@@ -41,17 +42,17 @@ android {
 
 dependencies {
 
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
-    implementation("com.google.android.gms:play-services-location:21.3.0")
+    implementation(libs.androidx.lifecycle.runtime.ktx.v290)
+    implementation(libs.play.services.location)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-    implementation ("com.google.accompanist:accompanist-permissions:0.31.5-beta")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation ("com.google.maps.android:maps-compose:4.4.0")
-    implementation("io.coil-kt:coil-compose:2.4.0")
-    implementation("com.google.android.gms:play-services-maps:18.0.2")
+    implementation (libs.accompanist.permissions)
+    implementation(libs.androidx.navigation.compose)
+    implementation (libs.maps.compose)
+    implementation(libs.coil.kt.coil.compose)
+    implementation(libs.play.services.maps)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
@@ -63,4 +64,17 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+    // Retrofit
+    implementation(libs.retrofit.v290)
+    // Retrofit with Scalar Converter
+    implementation(libs.converter.scalars)
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    implementation(libs.coil.kt.coil.compose)
+
 }

@@ -38,7 +38,7 @@ fun CustomMapMarker(
     location: LatLng,
     onClick: () -> Unit
 ) {
-    val markerState = remember { MarkerState(position = location) }
+    val markerState = remember(location) { MarkerState(position = location) } // recomputa cuando location cambia
     val shape = RoundedCornerShape(8.dp, 8.dp, 8.dp, 0.dp)
 
     var expandMarker by remember { mutableStateOf(false) }
@@ -101,4 +101,5 @@ fun CustomMapMarker(
         }
     }
 }
+
 
