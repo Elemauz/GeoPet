@@ -12,7 +12,7 @@ fun centerMapOnLocation(
     location: Location,
     cameraPositionState: CameraPositionState,
     scope: CoroutineScope,
-    zoom: Float = 16f
+    zoom: Float = 17.5f
 ) {
     val latLng = LatLng(location.latitude, location.longitude)
     val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoom)

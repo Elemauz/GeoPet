@@ -54,7 +54,6 @@ fun Contenido_Pantalla_Inicio(navController: NavController){
     val scope = rememberCoroutineScope()
 
 
-    // Centrar la cámara cuando se actualice la ubicación
     LaunchedEffect(locationState) {
         locationState?.let {
             centerMapOnLocation(it, cameraPositionState, scope)

@@ -24,9 +24,9 @@ fun RenderPetMarkers(
 }
 
 //extraccion de data de la API MASCOTAS
-//Simulacion de datos obtenidos
+//Simulacion de datos obtenidos-15.823028544854076, -70.01807017052504
 val petMarkers = listOf(
-    PetMarkerData(R.drawable.mistery_pet_icon, "Perro Chamba 1", LatLng(-15.8404, -70.0353)),
-    PetMarkerData(R.drawable.mistery_pet_icon, "Perro Chamba 2", LatLng(-15.8420, -70.0340)),
-    PetMarkerData(R.drawable.mistery_pet_icon, "Perro Chamba 3", LatLng(-15.8450, -70.0325))
+    PetMarkerData(R.drawable.mistery_pet_icon, "Perro Chamba 1", LatLng(-15.823028544854076, -70.01807017052504)),
+    PetMarkerData(R.drawable.mistery_pet_icon, "Perro Chamba 2", LatLng(-15.82310666473374, -70.01740255444425)),
+    PetMarkerData(R.drawable.mistery_pet_icon, "Perro Chamba 3", LatLng(-15.82226036442143, -70.0171950521485))
 )

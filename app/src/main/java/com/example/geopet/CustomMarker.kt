@@ -33,7 +33,7 @@ import androidx.compose.runtime.setValue
 
 @Composable
 fun CustomMapMarker(
-    @DrawableRes imageResId: Int?, // Puede ser nulo para mostrar solo texto
+    @DrawableRes imageResId: Int?,
     fullName: String,
     location: LatLng,
     onClick: () -> Unit
@@ -56,7 +56,7 @@ fun CustomMapMarker(
     ) {
         Box(
             modifier = Modifier
-                .size(if (expandMarker) 100.dp else 30.dp)
+                .size(if (expandMarker) 150.dp else 30.dp)
                 .clip(shape)
                 .background(Color.White)
                 .padding(4.dp),

@@ -30,7 +30,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 
-
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
