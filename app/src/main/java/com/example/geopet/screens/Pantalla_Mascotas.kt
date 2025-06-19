@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import com.example.geopet.data.api.RetrofitInstance
 import com.example.geopet.data.model.ApiConstants.BASE_URL
@@ -62,7 +63,7 @@ fun Contenido_Pantalla_Mascotas(navController: NavController) {
                         .padding(vertical = 8.dp)
                 ) {
                     Image(
-                        painter = rememberImagePainter(BASE_URL + pet.imagen_url.trimStart('/')),
+                        painter = rememberAsyncImagePainter(BASE_URL + pet.imagen_url.trimStart('/')),
                         contentDescription = pet.nombre,
                         modifier = Modifier
                             .size(64.dp)
