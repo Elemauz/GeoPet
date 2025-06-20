@@ -18,6 +18,7 @@ import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.maps.android.compose.*
+import com.example.geopet.data.model.ApiConstants
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -40,11 +41,11 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
     // Cargar mascotas
     LaunchedEffect(Unit) {
         try {
-            val pets = RetrofitInstance.api.getPets()
+            val pets = RetrofitInstance.api.getAllPets()
             petList = pets
             val icons = mutableMapOf<Int, BitmapDescriptor>()
             pets.forEach { pet ->
-                val url = "http://192.168.168.51:8000${pet.imagen_url}"
+                val url = ApiConstants.BASE_URL.trimEnd('/') + pet.imagen_url
                 val descriptor = getBitmapDescriptorFromUrl(context, url)
                 icons[pet.id] = descriptor ?: BitmapDescriptorFactory.defaultMarker()
             }
@@ -54,10 +55,24 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
         }
     }
 
-    // Centrar mapa
+    // Centrar mapa y enviar ubicación al backend
     LaunchedEffect(locationState) {
-        locationState?.let {
-            centerMapOnLocation(it, cameraPositionState, scope)
+        locationState?.let { location ->
+            // Centrar mapa
+            centerMapOnLocation(location, cameraPositionState, scope)
+
+            // Enviar ubicación al backend
+            try {
+                RetrofitInstance.api.enviarUbicacion(
+                    com.example.geopet.data.api.UbicacionRequest(
+                        lat = location.latitude,
+                        lon = location.longitude
+                    )
+                )
+                Log.d("Pantalla_Inicio", "Ubicación enviada: ${location.latitude}, ${location.longitude}")
+            } catch (e: Exception) {
+                Log.e("Pantalla_Inicio", "Error al enviar ubicación: ${e.localizedMessage}")
+            }
         }
     }
 

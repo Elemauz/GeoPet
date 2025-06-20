@@ -71,9 +71,9 @@ dependencies {
     implementation(libs.retrofit.v290)
     // Retrofit with Scalar Converter
     implementation(libs.converter.scalars)
-    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation(libs.coil.compose.v250)
 
-    implementation("com.github.bumptech.glide:glide:4.16.0")
+    implementation(libs.glide)
 
     implementation(libs.coil.kt.coil.compose)
 

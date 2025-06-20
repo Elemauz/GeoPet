@@ -12,29 +12,12 @@ data class UbicacionRequest(
 )
 
 interface PetApiService {
-    @GET("mascotas/todos")      // Obtener todo
-    suspend fun getPets(): List<Pet>
+    @GET("mascotas/todos")      // Obtener todas las mascotas
+    suspend fun getAllPets(): List<Pet>
 
-    @GET("mascotas")            // Obtener por lugar(ciudad)
+    @GET("mascotas")            // Obtener por lugar (ciudad)
     suspend fun getPetsByLocation(@Query("ubicacion") ubicacion: String): List<Pet>
 
-    @POST("ubicacion")          // ENviar la Ubicacion
+    @POST("ubicacion")          // Enviar ubicación del usuario
     suspend fun enviarUbicacion(@Body ubicacion: UbicacionRequest)
 }
-
-
-/*//llamar endpoint POST/ubicacion
-LaunchedEffect(locationState) {
-    locationState?.let { location ->
-        centerMapOnLocation(location, cameraPositionState, scope)
-
-        try {
-            val ubicacion = UbicacionRequest(lat = location.latitude, lon = location.longitude)
-            RetrofitInstance.api.enviarUbicacion(ubicacion)
-            Log.d("Pantalla_Inicio", "Ubicación enviada exitosamente")
-        } catch (e: Exception) {
-            Log.e("Pantalla_Inicio", "Error al enviar ubicación: ${e.localizedMessage}")
-        }
-    }
-}
-*/
