@@ -27,7 +27,7 @@ fun LocationUpdates(context: Context): State<Location?> {
     LaunchedEffect(Unit) {
         val locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            1000L
+            45_000L         /// Frecuencia de "POST" ubicacion
         ).build()
 
         fusedLocationClient.requestLocationUpdates(

@@ -59,7 +59,7 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
     LaunchedEffect(locationState) {
         locationState?.let { location ->
             // Centrar mapa
-            centerMapOnLocation(location, cameraPositionState, scope)
+            //centerMapOnLocation(location, cameraPositionState, scope)
 
             // Enviar ubicación al backend
             try {
