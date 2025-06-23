@@ -6,5 +6,6 @@ data class Pet(
     val rareza: String,
     val imagen_url: String,
     val lat: Double,
-    val lon: Double
+    val lon: Double,
+    val distancia_km: Double? = null
 )

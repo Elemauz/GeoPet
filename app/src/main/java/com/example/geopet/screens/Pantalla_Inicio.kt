@@ -12,6 +12,7 @@ import androidx.navigation.NavController
 import com.example.geopet.LocationUpdates
 import com.example.geopet.centerMapOnLocation
 import com.example.geopet.data.api.RetrofitInstance
+import com.example.geopet.data.api.UbicacionRequest
 import com.example.geopet.data.model.Pet
 import com.example.geopet.utils.getBitmapDescriptorFromUrl
 import com.google.android.gms.maps.model.BitmapDescriptor
@@ -19,6 +20,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.maps.android.compose.*
 import com.example.geopet.data.model.ApiConstants
+import com.example.geopet.utils.DeviceIdUtil
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -37,6 +39,7 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
     val scope = rememberCoroutineScope()
     var petList by remember { mutableStateOf<List<Pet>>(emptyList()) }
     var markerIcons by remember { mutableStateOf<Map<Int, BitmapDescriptor>>(emptyMap()) }
+    val deviceId = remember {DeviceIdUtil.getDeviceId(context)}
 
     // Cargar mascotas
     LaunchedEffect(Unit) {
@@ -64,12 +67,13 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
             // Enviar ubicación al backend
             try {
                 RetrofitInstance.api.enviarUbicacion(
-                    com.example.geopet.data.api.UbicacionRequest(
+                    UbicacionRequest(
+                        id_telefono = deviceId,
                         lat = location.latitude,
                         lon = location.longitude
                     )
                 )
-                Log.d("Pantalla_Inicio", "Ubicación enviada: ${location.latitude}, ${location.longitude}")
+                Log.d("Pantalla_Inicio", "Ubicación enviada con ID: $deviceId")
             } catch (e: Exception) {
                 Log.e("Pantalla_Inicio", "Error al enviar ubicación: ${e.localizedMessage}")
             }
