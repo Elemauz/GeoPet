@@ -36,7 +36,7 @@ fun BottomNavigationBar(navController: NavHostController) {
         AppScreens.Pantalla_Inicio,
         AppScreens.Pantalla_Mascotas,
         AppScreens.Pantalla_Buscar,
-        AppScreens.Pantalla_Perfil
+        AppScreens.Pantalla_Perfil,
 
     )
 

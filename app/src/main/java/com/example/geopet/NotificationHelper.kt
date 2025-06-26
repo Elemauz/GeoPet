@@ -12,7 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 object NotificationHelper {
 
     private fun createNotificationIntent(context: Context): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java).apply {
+        val intent = Intent(context, MainActivity2::class.java).apply {
             putExtra("destino", "Pantalla_Mascotas") // por ejemplo
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }

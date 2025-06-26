@@ -1,7 +1,5 @@
 package com.example.geopet
 
-
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,10 +9,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import com.example.geopet.navigation.AppNavigation
-import com.example.geopet.screens.Pantalla_Login
 import com.example.geopet.ui.theme.GeoPetTheme
 
-class MainActivity : ComponentActivity() {
+class MainActivity2 : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -34,3 +32,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+

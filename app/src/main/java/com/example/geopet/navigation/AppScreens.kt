@@ -11,4 +11,8 @@ sealed class AppScreens(
     object Pantalla_Mascotas : AppScreens("Pantalla_Mascotas", "Mascotas", R.drawable.pet)
     object Pantalla_Buscar : AppScreens("Pantalla_Buscar", "Buscar", R.drawable.route_icon)
     object Pantalla_Perfil : AppScreens("Pantalla_Perfil", "Perfil", R.drawable.cuenta_picture)
+    object Pantalla_Login : AppScreens("Pantalla_Login", "Login", R.drawable.cuenta_picture)
+    object Pantalla_Registro: AppScreens("Pantalla_Registro", "Registro", R.drawable.cuenta_picture)
+
+
 }
