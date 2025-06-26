@@ -4,9 +4,9 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,56 +20,51 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.geopet.data.api.RetrofitInstance
-import com.example.geopet.data.model.Pet
-import com.example.geopet.data.model.ApiConstants
 import com.example.geopet.data.model.ApiConstants.BASE_URL
-import kotlinx.coroutines.launch
+import com.example.geopet.firebase.data.MascotaCollectionManager
+import com.example.geopet.firebase.model.MascotaFirebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
+import java.net.URLEncoder
+import java.util.*
 
 val VerdeOscuro = Color(0xFF4A5759)
 val VerdeClaro = Color(0xFFB0C4B1)
 val Crema = Color(0xFFDEDBD2)
 val CremaClaro = Color(0xFFF7E1D7)
-
-//val imageUrl = BASE_URL.trimEnd('/') + "/" + mascota.imagen_url.trimStart('/')
+val BASE_IMAGE_URL = "$BASE_URL/static/mascotas/"
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun Pantalla_Mascotas(navController: NavController) {
-    Scaffold (
-        containerColor = VerdeClaro
-    ){
+    Scaffold(containerColor = VerdeClaro) {
         Contenido_Pantalla_Mascotas(navController)
     }
 }
 
 @Composable
 fun Contenido_Pantalla_Mascotas(navController: NavController) {
-    var mascotas by remember { mutableStateOf<List<Pet>>(emptyList()) }
+    var mascotas by remember { mutableStateOf<List<MascotaFirebase>>(emptyList()) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         try {
-            mascotas = RetrofitInstance.api.getAllPets()
+            mascotas = MascotaCollectionManager.obtenerMascotasDelUsuario()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    MascotaGridConDetalle(
-        mascotas = mascotas,
-        baseUrl = BASE_URL
-    )
+    MascotaGridConDetalleRecolectadas(mascotas = mascotas, baseUrl = BASE_URL)
 }
 
 @Composable
-fun MascotaGridConDetalle(mascotas: List<Pet>, baseUrl: String) {
-    var mascotaSeleccionada by remember { mutableStateOf<Pet?>(null) }
+fun MascotaGridConDetalleRecolectadas(mascotas: List<MascotaFirebase>, baseUrl: String) {
+    var mascotaSeleccionada by remember { mutableStateOf<MascotaFirebase?>(null) }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Crema)
+        modifier = Modifier.fillMaxSize().background(Crema)
     ) {
         Column(
             modifier = Modifier
@@ -87,7 +82,8 @@ fun MascotaGridConDetalle(mascotas: List<Pet>, baseUrl: String) {
                     horizontalArrangement = Arrangement.Center
                 ) {
                     row.forEach { mascota ->
-                        val imageUrl = baseUrl.trimEnd('/') + mascota.imagen_url
+                        val imageUrl = baseUrl.trimEnd('/') + "/static/mascotas/" +
+                                formatearNombre(mascota.nombre) + ".png"
 
                         Box(
                             modifier = Modifier
@@ -130,7 +126,8 @@ fun MascotaGridConDetalle(mascotas: List<Pet>, baseUrl: String) {
         }
 
         mascotaSeleccionada?.let { mascota ->
-            val imageUrl = baseUrl.trimEnd('/') + mascota.imagen_url
+            val imageUrl = baseUrl.trimEnd('/') + "/static/mascotas/" +
+                    formatearNombre(mascota.nombre) + ".png"
 
             Box(
                 modifier = Modifier
@@ -187,4 +184,8 @@ fun MascotaGridConDetalle(mascotas: List<Pet>, baseUrl: String) {
             }
         }
     }
+}
+
+fun formatearNombre(nombre: String): String {
+    return nombre.trim().lowercase().replace(" ", "_")
 }

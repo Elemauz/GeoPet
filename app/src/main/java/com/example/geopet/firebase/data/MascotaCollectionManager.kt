@@ -2,6 +2,7 @@ package com.example.geopet.firebase.data
 
 import android.content.Context
 import android.util.Log
+import com.example.geopet.firebase.model.MascotaFirebase
 import com.example.geopet.data.api.RetrofitInstance
 import com.example.geopet.data.model.Pet
 import com.google.firebase.auth.FirebaseAuth
@@ -127,7 +128,22 @@ private suspend fun eliminarMascotaDelBackend(lat: Double, lon: Double) {
         Log.e("EliminarMascota", "Error al eliminar mascota: ${e.message}")
     }
 }
+    suspend fun obtenerMascotasDelUsuario(): List<MascotaFirebase> {
+        val usuarioId = auth.currentUser?.uid ?: return emptyList()
+        return try {
+            val snapshot = firestore.collection("usuarios")
+                .document(usuarioId)
+                .collection("mascotas")
+                .get()
+                .await()
 
+            snapshot.documents.mapNotNull { it.toObject(MascotaFirebase::class.java) }
+
+        } catch (e: Exception) {
+            Log.e("FirestoreMascotas", "Error: ${e.message}")
+            emptyList()
+        }
+    }
 
     private fun calcularDistanciaEnKm(
         lat1: Double, lon1: Double,
