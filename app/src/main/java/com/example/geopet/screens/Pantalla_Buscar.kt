@@ -21,36 +21,40 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import androidx.navigation.NavController
 import com.example.geopet.NotificationHelper
+import com.google.android.gms.maps.model.LatLng
 
 
 data class MascotaCercana(
     val nombre: String,
     val rareza: String,
     val distancia: String,
-    val imagenUrl: String
+    val imagenUrl: String,
+    val location: LatLng
 )
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun Pantalla_Buscar(navController: NavController) {
+fun Pantalla_Buscar(navController: NavController,onBuscarMascota: (LatLng) -> Unit) {
     Scaffold(
         containerColor = VerdeClaro
     ) {
-        Contenido_Pantalla_Buscar(navController)
+        Contenido_Pantalla_Buscar(navController, onBuscarMascota)
     }
 }
 
 @Composable
-fun Contenido_Pantalla_Buscar(navController: NavController) {
+fun Contenido_Pantalla_Buscar(navController: NavController,onBuscarMascota: (LatLng) -> Unit) {
     val context = LocalContext.current
 
     val mascotas = listOf(
-        MascotaCercana("Palomo", "Legendario", "300 m", "https://www.shutterstock.com/image-vector/anime-cartoon-character-orange-color-600nw-2407945115.jpg"),
-        MascotaCercana("Gato Mewing", "Ultra raro", "500 m", "https://www.shutterstock.com/image-vector/anime-cartoon-character-orange-color-600nw-2407945115.jpg"),
-        MascotaCercana("Perro Facha", "Raro", "1.2 km", "https://www.shutterstock.com/image-vector/anime-cartoon-character-orange-color-600nw-2407945115.jpg"),
-        MascotaCercana("Caracolito", "Legendario", "750 m", "https://www.shutterstock.com/image-vector/anime-cartoon-character-orange-color-600nw-2407945115.jpg"),
-        MascotaCercana("Paloma Táctica", "Legendario", "2.1 km", "https://www.shutterstock.com/image-vector/anime-cartoon-character-orange-color-600nw-2407945115.jpg")
+        MascotaCercana("Palomo", "Legendario", "300 m", "https://www.shutterstock.com/image-vector/anime-cartoon-character-orange-color-600nw-2407945115.jpg", LatLng(-15.823028, -70.018070)),
+        MascotaCercana("Gato Mewing", "Ultra raro", "500 m", "https://www.shutterstock.com/image-vector/anime-cartoon-character-orange-color-600nw-2407945115.jpg", LatLng(-15.823106, -70.017402)),
+        MascotaCercana("Perro Facha", "Raro", "1.2 km", "https://www.shutterstock.com/image-vector/anime-cartoon-character-orange-color-600nw-2407945115.jpg", LatLng(-15.822260, -70.017195)),
+        MascotaCercana("Caracolito", "Legendario", "750 m", "https://www.shutterstock.com/image-vector/anime-cartoon-character-orange-color-600nw-2407945115.jpg", LatLng(-15.8225, -70.0185)),
+        MascotaCercana("Paloma Táctica", "Legendario", "2.1 km", "https://www.shutterstock.com/image-vector/anime-cartoon-character-orange-color-600nw-2407945115.jpg", LatLng(-15.824, -70.0175))
     )
+
 
     var mascotaSeleccionada by remember { mutableStateOf<MascotaCercana?>(null) }
 
@@ -126,7 +130,7 @@ fun Contenido_Pantalla_Buscar(navController: NavController) {
                         .wrapContentHeight()
                         .padding(16.dp),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = CremaClaro)
+                    colors = CardDefaults.cardColors(containerColor = VerdeClaro)
                 ) {
                     Column(
                         modifier = Modifier
@@ -164,16 +168,19 @@ fun Contenido_Pantalla_Buscar(navController: NavController) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
+                                mascotaSeleccionada?.let {
+                                    onBuscarMascota(it.location)
+                                }
                                 mascotaSeleccionada = null
+                                navController.popBackStack()
                             },
-                            colors = ButtonDefaults.buttonColors(containerColor = VerdeOscuro)
+                            colors = ButtonDefaults.buttonColors(containerColor = CremaClaro)
                         ) {
                             Text("Buscar")
                         }
                     }
                 }
             }
-        }
     }
 }
-
+}

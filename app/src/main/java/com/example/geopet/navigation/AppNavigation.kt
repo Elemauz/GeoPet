@@ -23,6 +23,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.maps.model.LatLng
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -33,6 +34,7 @@ fun AppNavigation(destino: String? = null) {
     val isLoggedIn = remember { mutableStateOf(false) }
     val intentDestino = activity?.intent?.getStringExtra("destino")
     val destinoNotificacion = remember { mutableStateOf<String?>(null) }
+    val destinoSeleccionado = remember { mutableStateOf<LatLng?>(null) }
 
     val permissionState = rememberMultiplePermissionsState(
         permissions = listOf(
@@ -116,7 +118,7 @@ fun AppNavigation(destino: String? = null) {
             }
 
             composable(AppScreens.Pantalla_Inicio.route) {
-                Pantalla_Inicio(navController)
+                Pantalla_Inicio(navController, destinoSeleccionado)
             }
 
             composable(AppScreens.Pantalla_Mascotas.route) {
@@ -124,7 +126,13 @@ fun AppNavigation(destino: String? = null) {
             }
 
             composable(AppScreens.Pantalla_Buscar.route) {
-                Pantalla_Buscar(navController)
+                Pantalla_Buscar(
+                    navController = navController,
+                    onBuscarMascota = { latLng ->
+                        destinoSeleccionado.value = latLng
+                        navController.navigate(AppScreens.Pantalla_Inicio.route)
+                    }
+                )
             }
 
             composable(AppScreens.Pantalla_Perfil.route) {

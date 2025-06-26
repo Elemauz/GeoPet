@@ -47,7 +47,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
-    implementation ("com.google.accompanist:accompanist-permissions:0.31.5-beta")
+    implementation ("com.google.accompanist:accompanist-permissions:0.30.1")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation ("com.google.maps.android:maps-compose:4.4.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
