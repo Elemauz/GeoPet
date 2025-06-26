@@ -16,12 +16,15 @@ import com.example.geopet.screens.Pantalla_Mascotas
 import com.example.geopet.screens.Pantalla_Perfil
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.geopet.screens.PantallaLogin
+import com.example.geopet.screens.PantallaRegistro
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun AppNavigation(destino: String? = null) {
     val navController = rememberNavController()
@@ -37,6 +40,7 @@ fun AppNavigation(destino: String? = null) {
             Manifest.permission.POST_NOTIFICATIONS
         )
     )
+
     LaunchedEffect(Unit) {
         if (!permissionState.allPermissionsGranted) {
             permissionState.launchMultiplePermissionRequest()
@@ -48,15 +52,12 @@ fun AppNavigation(destino: String? = null) {
         destinoNotificacion.value?.let {
             navController.navigate(it) {
                 popUpTo(navController.graph.startDestinationId) {
-                    saveState = true
+                    inclusive = true
                 }
-                launchSingleTop = true
-                restoreState = true
             }
             destinoNotificacion.value = null
         }
     }
-
 
     LaunchedEffect(destino) {
         destino?.let {
@@ -64,16 +65,33 @@ fun AppNavigation(destino: String? = null) {
         }
     }
 
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
+    val showBottomBar = currentDestination !in listOf(
+        "pantalla_login",
+        "pantalla_registro"
+    )
+
     Scaffold(
         bottomBar = {
-            BottomNavigationBar(navController = navController)
+            if (showBottomBar) {
+                BottomNavigationBar(navController = navController)
+            }
         }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = AppScreens.Pantalla_Inicio.route,
+            startDestination = "pantalla_login",
             modifier = Modifier.padding(innerPadding)
         ) {
+            // Autenticación
+            composable("pantalla_login") {
+                PantallaLogin(navController)
+            }
+            composable("pantalla_registro") {
+                PantallaRegistro(navController)
+            }
+
+            // Pantallas principales
             composable(AppScreens.Pantalla_Inicio.route) {
                 Pantalla_Inicio(navController)
             }

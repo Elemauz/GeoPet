@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -64,6 +64,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.androidx.material.icons.extended)
 
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
@@ -71,10 +72,21 @@ dependencies {
     implementation(libs.retrofit.v290)
     // Retrofit with Scalar Converter
     implementation(libs.converter.scalars)
+
     implementation(libs.coil.compose.v250)
-
     implementation(libs.glide)
-
     implementation(libs.coil.kt.coil.compose)
+    //Firebase
+    // Import the Firebase BoM
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.play.services.auth)
+    implementation (libs.firebase.firestore)
+    implementation (libs.play.services.auth.v2100)
+    implementation (libs.google.firebase.auth.ktx)
+
+    implementation (libs.com.google.firebase.firebase.auth.ktx)
+    implementation (libs.kotlinx.coroutines.play.services)
+
 
 }

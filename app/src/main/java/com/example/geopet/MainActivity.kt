@@ -1,5 +1,6 @@
 package com.example.geopet
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,8 +15,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
+import com.example.geopet.firebase.auth.GoogleAuthManager
 import com.example.geopet.navigation.AppNavigation
 import com.example.geopet.ui.theme.GeoPetTheme
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -37,5 +43,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
 }
 

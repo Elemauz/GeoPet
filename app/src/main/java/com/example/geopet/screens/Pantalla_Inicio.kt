@@ -4,10 +4,15 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.geopet.LocationUpdates
 import com.example.geopet.centerMapOnLocation
@@ -21,7 +26,12 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.maps.android.compose.*
 import com.example.geopet.data.model.ApiConstants
 import com.example.geopet.utils.DeviceIdUtil
-import kotlinx.coroutines.launch
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.LocationOff
+import androidx.compose.ui.Alignment
+import com.example.geopet.firebase.data.MascotaCollectionManager
+import com.google.api.Context
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -39,7 +49,10 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
     val scope = rememberCoroutineScope()
     var petList by remember { mutableStateOf<List<Pet>>(emptyList()) }
     var markerIcons by remember { mutableStateOf<Map<Int, BitmapDescriptor>>(emptyMap()) }
-    val deviceId = remember {DeviceIdUtil.getDeviceId(context)}
+    val deviceId = remember { DeviceIdUtil.getDeviceId(context) }
+
+    var seguirUbicacion by remember { mutableStateOf(false) }
+
 
     // Cargar mascotas
     LaunchedEffect(Unit) {
@@ -61,11 +74,12 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
     // Centrar mapa y enviar ubicación al backend
     LaunchedEffect(locationState) {
         locationState?.let { location ->
-            // Centrar mapa
-            //centerMapOnLocation(location, cameraPositionState, scope)
+            if (seguirUbicacion) {
+                centerMapOnLocation(location, cameraPositionState, scope)
+            }
 
-            // Enviar ubicación al backend
             try {
+                // 1. Enviar ubicación al backend
                 RetrofitInstance.api.enviarUbicacion(
                     UbicacionRequest(
                         id_telefono = deviceId,
@@ -74,13 +88,22 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
                     )
                 )
                 Log.d("Pantalla_Inicio", "Ubicación enviada con ID: $deviceId")
+
+                // 2. Recolectar mascotas cercanas
+                MascotaCollectionManager.recolectarMascotasCercanas(
+                    context = context,
+                    mascotas = petList,
+                    ubicacionUsuarioLat = location.latitude,
+                    ubicacionUsuarioLon = location.longitude
+                )
             } catch (e: Exception) {
-                Log.e("Pantalla_Inicio", "Error al enviar ubicación: ${e.localizedMessage}")
+                Log.e("Pantalla_Inicio", "Error en ubicación/recolección: ${e.localizedMessage}")
             }
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
+
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
@@ -104,6 +127,22 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
                     icon = icon
                 )
             }
+        }
+        FloatingActionButton(
+            onClick = {
+                seguirUbicacion = !seguirUbicacion
+                if (seguirUbicacion) {
+                    locationState?.let { centerMapOnLocation(it, cameraPositionState, scope) }
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = if (seguirUbicacion) Icons.Rounded.LocationOn else Icons.Rounded.LocationOff,
+                contentDescription = if (seguirUbicacion) "Seguimiento activado" else "Seguimiento desactivado"
+            )
         }
     }
 }

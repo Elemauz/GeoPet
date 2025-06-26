@@ -2,6 +2,7 @@ package com.example.geopet.data.api
 
 import com.example.geopet.data.model.Pet
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -28,4 +29,9 @@ interface PetApiService {
         @Query("orden") orden: String
     ): List<Pet>
 
+    @DELETE("mascotas/ubicacion")
+    suspend fun eliminarMascotaPorUbicacion(
+        @Query("lat") latitud: Double,
+        @Query("lon") longitud: Double
+    )
 }
