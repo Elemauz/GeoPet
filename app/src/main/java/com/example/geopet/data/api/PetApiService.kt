@@ -1,6 +1,7 @@
 package com.example.geopet.data.api
 
 import com.example.geopet.data.model.Pet
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -31,7 +32,8 @@ interface PetApiService {
 
     @DELETE("mascotas/ubicacion")
     suspend fun eliminarMascotaPorUbicacion(
-        @Query("lat") latitud: Double,
-        @Query("lon") longitud: Double
-    )
+        @Query("lat") lat: Double,
+        @Query("lon") lon: Double
+    ): Response<Unit>
+
 }

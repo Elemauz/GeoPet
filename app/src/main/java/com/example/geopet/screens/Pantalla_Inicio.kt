@@ -31,6 +31,9 @@ import androidx.compose.material.icons.rounded.LocationOff
 import androidx.compose.ui.Alignment
 import com.example.geopet.firebase.data.MascotaCollectionManager
 import com.google.api.Context
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -74,30 +77,34 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
     // Centrar mapa y enviar ubicación al backend
     LaunchedEffect(locationState) {
         locationState?.let { location ->
+            Log.d("Ubicacion", "Lat: ${location.latitude}, Lon: ${location.longitude}")
+
             if (seguirUbicacion) {
                 centerMapOnLocation(location, cameraPositionState, scope)
             }
 
-            try {
-                // 1. Enviar ubicación al backend
-                RetrofitInstance.api.enviarUbicacion(
-                    UbicacionRequest(
-                        id_telefono = deviceId,
-                        lat = location.latitude,
-                        lon = location.longitude
+            scope.launch(Dispatchers.IO) {
+                try {
+                    // 1. Enviar ubicación
+                    RetrofitInstance.api.enviarUbicacion(
+                        UbicacionRequest(
+                            id_telefono = deviceId,
+                            lat = location.latitude,
+                            lon = location.longitude
+                        )
                     )
-                )
-                Log.d("Pantalla_Inicio", "Ubicación enviada con ID: $deviceId")
+                    Log.d("Pantalla_Inicio", "Ubicación enviada con ID: $deviceId")
 
-                // 2. Recolectar mascotas cercanas
-                MascotaCollectionManager.recolectarMascotasCercanas(
-                    context = context,
-                    mascotas = petList,
-                    ubicacionUsuarioLat = location.latitude,
-                    ubicacionUsuarioLon = location.longitude
-                )
-            } catch (e: Exception) {
-                Log.e("Pantalla_Inicio", "Error en ubicación/recolección: ${e.localizedMessage}")
+                    // 2. Recolectar mascotas
+                    MascotaCollectionManager.recolectarMascotasCercanas(
+                        context = context,
+                        mascotas = petList,
+                        ubicacionUsuarioLat = location.latitude,
+                        ubicacionUsuarioLon = location.longitude
+                    )
+                } catch (e: Exception) {
+                    Log.e("Pantalla_Inicio", "Error en ubicación/recolección: ${e.localizedMessage}")
+                }
             }
         }
     }
