@@ -14,24 +14,27 @@ import com.example.geopet.screens.Pantalla_Buscar
 import com.example.geopet.screens.Pantalla_Inicio
 import com.example.geopet.screens.Pantalla_Mascotas
 import com.example.geopet.screens.Pantalla_Perfil
+import com.example.geopet.screens.Pantalla_Login
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.geopet.screens.PantallaLogin
-import com.example.geopet.screens.PantallaRegistro
+import com.example.geopet.screens.Pantalla_Registro
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.maps.model.LatLng
 
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalPermissionsApi::class)
 @Composable
 fun AppNavigation(destino: String? = null) {
     val navController = rememberNavController()
     val context = LocalContext.current
     val activity = context as? Activity
+    val isLoggedIn = remember { mutableStateOf(false) }
     val intentDestino = activity?.intent?.getStringExtra("destino")
     val destinoNotificacion = remember { mutableStateOf<String?>(null) }
+    val destinoSeleccionado = remember { mutableStateOf<LatLng?>(null) }
 
     val permissionState = rememberMultiplePermissionsState(
         permissions = listOf(
@@ -40,7 +43,6 @@ fun AppNavigation(destino: String? = null) {
             Manifest.permission.POST_NOTIFICATIONS
         )
     )
-
     LaunchedEffect(Unit) {
         if (!permissionState.allPermissionsGranted) {
             permissionState.launchMultiplePermissionRequest()
@@ -52,12 +54,15 @@ fun AppNavigation(destino: String? = null) {
         destinoNotificacion.value?.let {
             navController.navigate(it) {
                 popUpTo(navController.graph.startDestinationId) {
-                    inclusive = true
+                    saveState = true
                 }
+                launchSingleTop = true
+                restoreState = true
             }
             destinoNotificacion.value = null
         }
     }
+
 
     LaunchedEffect(destino) {
         destino?.let {
@@ -65,46 +70,81 @@ fun AppNavigation(destino: String? = null) {
         }
     }
 
-    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
-    val showBottomBar = currentDestination !in listOf(
-        "pantalla_login",
-        "pantalla_registro"
-    )
-
     Scaffold(
         bottomBar = {
-            if (showBottomBar) {
+            val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
+            if (currentDestination in listOf(
+                    AppScreens.Pantalla_Inicio.route,
+                    AppScreens.Pantalla_Mascotas.route,
+                    AppScreens.Pantalla_Buscar.route,
+                    AppScreens.Pantalla_Perfil.route
+                )
+            ) {
                 BottomNavigationBar(navController = navController)
             }
         }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = "pantalla_login",
+            startDestination = AppScreens.Pantalla_Login.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            // Autenticación
-            composable("pantalla_login") {
-                PantallaLogin(navController)
-            }
-            composable("pantalla_registro") {
-                PantallaRegistro(navController)
+            composable(AppScreens.Pantalla_Login.route) {
+                Pantalla_Login(
+                    onLoginSuccess = {
+                        navController.navigate(AppScreens.Pantalla_Inicio.route) {
+                            popUpTo(AppScreens.Pantalla_Login.route) { inclusive = true }
+                        }
+                    },
+                    onRegisterClick = {
+                        navController.navigate(AppScreens.Pantalla_Registro.route)
+                    }
+                )
             }
 
-            // Pantallas principales
-            composable(AppScreens.Pantalla_Inicio.route) {
-                Pantalla_Inicio(navController)
+            composable(AppScreens.Pantalla_Registro.route) {
+                Pantalla_Registro(
+                    onRegisterSuccess = {
+                        navController.navigate(AppScreens.Pantalla_Inicio.route) {
+                            popUpTo(AppScreens.Pantalla_Login.route) { inclusive = true }
+                        }
+                    },
+                    onLoginClick = {
+                        navController.navigate(AppScreens.Pantalla_Login.route) {
+                            popUpTo(AppScreens.Pantalla_Registro.route) { inclusive = true }
+                        }
+                    }
+                )
             }
+
+            composable(AppScreens.Pantalla_Inicio.route) {
+                Pantalla_Inicio(navController, destinoSeleccionado)
+            }
+
             composable(AppScreens.Pantalla_Mascotas.route) {
                 Pantalla_Mascotas(navController)
             }
+
             composable(AppScreens.Pantalla_Buscar.route) {
-                Pantalla_Buscar(navController)
+                Pantalla_Buscar(
+                    navController = navController,
+                    onBuscarMascota = { latLng ->
+                        destinoSeleccionado.value = latLng
+                        navController.navigate(AppScreens.Pantalla_Inicio.route)
+                    }
+                )
             }
             composable(AppScreens.Pantalla_Perfil.route) {
-                Pantalla_Perfil(navController)
+                Pantalla_Perfil(
+                    navController = navController,
+                    onLogout = {
+                        navController.navigate(AppScreens.Pantalla_Login.route) {
+                            popUpTo(0) { inclusive = true } // 🔥 Limpia el backstack
+                        }
+                    }
+                )
             }
         }
     }
-}
 
+}

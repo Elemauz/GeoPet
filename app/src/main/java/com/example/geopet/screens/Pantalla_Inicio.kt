@@ -1,3 +1,4 @@
+
 package com.example.geopet.screens
 
 import android.annotation.SuppressLint
@@ -29,20 +30,24 @@ import com.example.geopet.utils.DeviceIdUtil
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.LocationOff
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import com.example.geopet.firebase.data.MascotaCollectionManager
-import com.google.api.Context
+import com.example.geopet.polyline.obtenerRutaDesdeGoogle
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun Pantalla_Inicio(navController: NavController) {
+fun Pantalla_Inicio(navController: NavController,
+                    destinoSeleccionado: MutableState<LatLng?>) {
     Scaffold {
-        Contenido_Pantalla_Inicio(navController)
+        Contenido_Pantalla_Inicio(navController,
+            destinoSeleccionado)
     }
 }
 
 @Composable
-fun Contenido_Pantalla_Inicio(navController: NavController) {
+fun Contenido_Pantalla_Inicio(navController: NavController,
+                              destinoSeleccionado: MutableState<LatLng?>) {
     val context = LocalContext.current
     val locationState by LocationUpdates(context)
     val cameraPositionState = rememberCameraPositionState()
@@ -52,6 +57,7 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
     val deviceId = remember { DeviceIdUtil.getDeviceId(context) }
 
     var seguirUbicacion by remember { mutableStateOf(false) }
+    val ruta = remember { mutableStateOf<List<LatLng>>(emptyList()) }
 
 
     // Cargar mascotas
@@ -102,6 +108,18 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
         }
     }
 
+    LaunchedEffect(destinoSeleccionado.value, locationState) {
+        if (destinoSeleccionado.value != null && locationState != null) {
+            val ubicacionActual = locationState
+            if (ubicacionActual != null && destinoSeleccionado.value != null) {
+                val origen = LatLng(ubicacionActual.latitude, ubicacionActual.longitude)
+                val destino = destinoSeleccionado.value!!
+                val puntosRuta = obtenerRutaDesdeGoogle(origen, destino, "AIzaSyB3S_g1pxZVAi8NWMdrR5PGwX8HQ2n2t0o")
+                ruta.value = puntosRuta
+            }
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
 
         GoogleMap(
@@ -127,6 +145,11 @@ fun Contenido_Pantalla_Inicio(navController: NavController) {
                     icon = icon
                 )
             }
+            Polyline(
+                points = ruta.value,
+                color = Color.Red,
+                width = 8f
+            )
         }
         FloatingActionButton(
             onClick = {

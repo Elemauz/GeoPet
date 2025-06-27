@@ -29,8 +29,8 @@ import com.example.geopet.data.api.UbicacionRequest
 import com.example.geopet.data.model.ApiConstants
 import com.example.geopet.data.model.Pet
 import com.example.geopet.utils.DeviceIdUtil
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 fun buildImageUrl(base: String, path: String): String {
     return base.trimEnd('/') + path
@@ -38,24 +38,24 @@ fun buildImageUrl(base: String, path: String): String {
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun Pantalla_Buscar(navController: NavController) {
+fun Pantalla_Buscar(navController: NavController, onBuscarMascota: (LatLng) -> Unit) {
     Scaffold(
         containerColor = VerdeClaro
     ) {
-        Contenido_Pantalla_Buscar(navController)
+        Contenido_Pantalla_Buscar(navController, onBuscarMascota)
     }
 }
 
 @Composable
-fun Contenido_Pantalla_Buscar(navController: NavController) {
+fun Contenido_Pantalla_Buscar(navController: NavController, onBuscarMascota: (LatLng) -> Unit) {
     val context = LocalContext.current
     val locationState by LocationUpdates(context)
     val deviceId = remember { DeviceIdUtil.getDeviceId(context) }
     var mascotas by remember { mutableStateOf<List<Pet>>(emptyList()) }
     var userLocation by remember { mutableStateOf<Location?>(null) }
     var orden by remember { mutableStateOf("asc") }
+    var mascotaSeleccionada by remember { mutableStateOf<Pet?>(null) }
 
-    // Enviar ubicación cada 45 segundos
     LaunchedEffect(locationState) {
         while (true) {
             locationState?.let { location ->
@@ -73,11 +73,10 @@ fun Contenido_Pantalla_Buscar(navController: NavController) {
                     Log.e("Pantalla_Buscar", "Error al enviar ubicación: ${e.localizedMessage}")
                 }
             }
-            delay(45000L) // 45 segundos
+            delay(45000L)
         }
     }
 
-    // Obtener mascotas ordenadas
     LaunchedEffect(userLocation, orden) {
         try {
             mascotas = RetrofitInstance.api.getPetsOrdenadas(
@@ -119,13 +118,20 @@ fun Contenido_Pantalla_Buscar(navController: NavController) {
 
         MascotaGridOrdenada(
             mascotas = mascotas,
-            baseUrl = ApiConstants.BASE_URL
+            baseUrl = ApiConstants.BASE_URL,
+            onBuscarMascota = onBuscarMascota,
+            navController = navController
         )
     }
 }
 
 @Composable
-fun MascotaGridOrdenada(mascotas: List<Pet>, baseUrl: String) {
+fun MascotaGridOrdenada(
+    mascotas: List<Pet>,
+    baseUrl: String,
+    onBuscarMascota: (LatLng) -> Unit,
+    navController: NavController
+) {
     var mascotaSeleccionada by remember { mutableStateOf<Pet?>(null) }
 
     Box(
@@ -163,7 +169,7 @@ fun MascotaGridOrdenada(mascotas: List<Pet>, baseUrl: String) {
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 AsyncImage(
-                                    model = buildImageUrl(ApiConstants.BASE_URL, mascota.imagen_url),
+                                    model = buildImageUrl(baseUrl, mascota.imagen_url),
                                     contentDescription = mascota.nombre,
                                     modifier = Modifier
                                         .size(120.dp)
@@ -224,7 +230,7 @@ fun MascotaGridOrdenada(mascotas: List<Pet>, baseUrl: String) {
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         AsyncImage(
-                            model = "${ApiConstants.BASE_URL}${mascota.imagen_url}",
+                            model = buildImageUrl(baseUrl, mascota.imagen_url),
                             contentDescription = mascota.nombre,
                             modifier = Modifier
                                 .size(180.dp)
@@ -258,10 +264,16 @@ fun MascotaGridOrdenada(mascotas: List<Pet>, baseUrl: String) {
                         }
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
-                            onClick = { mascotaSeleccionada = null },
+                            onClick = {
+                                mascota.distancia_km?.let {
+                                    onBuscarMascota(LatLng(mascota.lat, mascota.lon))
+                                }
+                                mascotaSeleccionada = null
+                                navController.popBackStack()
+                            },
                             colors = ButtonDefaults.buttonColors(containerColor = VerdeOscuro)
                         ) {
-                            Text("Cerrar")
+                            Text("Buscar")
                         }
                     }
                 }
