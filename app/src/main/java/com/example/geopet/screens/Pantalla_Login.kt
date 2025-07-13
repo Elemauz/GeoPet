@@ -141,16 +141,15 @@ fun Contenido_Pantalla_Login(onLoginSuccess: () -> Unit, onRegisterClick: () -> 
             Button(
                 onClick = {
                     if (email.isBlank() || password.length < 6) {
-                        onLoginSuccess()
-                        /*Toast.makeText(
+                        Toast.makeText(
                             context,
                             "Ingrese un correo válido y una contraseña de al menos 6 caracteres",
                             Toast.LENGTH_LONG
-                        ).show()*/
+                        ).show()
                     } else {
                         scope.launch {
                             val success = FirebaseAuthManager.loginWithEmail(email, password, context)
-                            if (success) onLoginSuccess()
+                            
                         }
                     }
                 },

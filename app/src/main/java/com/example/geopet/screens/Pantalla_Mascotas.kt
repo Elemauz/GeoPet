@@ -1,6 +1,7 @@
 package com.example.geopet.screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,20 +21,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.geopet.data.api.RetrofitInstance
 import com.example.geopet.data.model.ApiConstants.BASE_URL
-import com.example.geopet.firebase.data.MascotaCollectionManager
-import com.example.geopet.firebase.model.MascotaFirebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
-import java.net.URLEncoder
-import java.util.*
+import com.example.geopet.data.model.Pet
+import kotlinx.coroutines.launch
 
 val VerdeOscuro = Color(0xFF4A5759)
 val VerdeClaro = Color(0xFFB0C4B1)
 val Crema = Color(0xFFDEDBD2)
 val CremaClaro = Color(0xFFF7E1D7)
-val BASE_IMAGE_URL = "$BASE_URL/static/mascotas/"
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -45,23 +41,41 @@ fun Pantalla_Mascotas(navController: NavController) {
 
 @Composable
 fun Contenido_Pantalla_Mascotas(navController: NavController) {
-    var mascotas by remember { mutableStateOf<List<MascotaFirebase>>(emptyList()) }
+    var mascotas by remember { mutableStateOf<List<Pet>>(emptyList()) }
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         try {
-            mascotas = MascotaCollectionManager.obtenerMascotasDelUsuario()
+            mascotas = RetrofitInstance.api.getAllPets()
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    MascotaGridConDetalleRecolectadas(mascotas = mascotas, baseUrl = BASE_URL)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Crema)
+    ) {
+        Text(
+            text = "Todas las Mascotas Existentes",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = VerdeOscuro,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp, bottom = 12.dp)
+        )
+
+        MascotaGridConDetalle(mascotas = mascotas, baseUrl = BASE_URL)
+    }
 }
 
+
 @Composable
-fun MascotaGridConDetalleRecolectadas(mascotas: List<MascotaFirebase>, baseUrl: String) {
-    var mascotaSeleccionada by remember { mutableStateOf<MascotaFirebase?>(null) }
+fun MascotaGridConDetalle(mascotas: List<Pet>, baseUrl: String) {
+    var mascotaSeleccionada by remember { mutableStateOf<Pet?>(null) }
 
     Box(
         modifier = Modifier.fillMaxSize().background(Crema)
@@ -77,13 +91,11 @@ fun MascotaGridConDetalleRecolectadas(mascotas: List<MascotaFirebase>, baseUrl: 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 8.dp),
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     row.forEach { mascota ->
-                        val imageUrl = baseUrl.trimEnd('/') + "/static/mascotas/" +
-                                formatearNombre(mascota.nombre) + ".png"
+                        val imageUrl = baseUrl.trimEnd('/') + mascota.imagen_url
 
                         Box(
                             modifier = Modifier
@@ -104,7 +116,10 @@ fun MascotaGridConDetalleRecolectadas(mascotas: List<MascotaFirebase>, baseUrl: 
                                     modifier = Modifier
                                         .size(120.dp)
                                         .clip(RoundedCornerShape(16.dp)),
-                                    contentScale = ContentScale.Crop
+                                    contentScale = ContentScale.Crop,
+                                    onError = {
+                                        Log.e("ImageError", "No se pudo cargar: $imageUrl")
+                                    }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
@@ -126,8 +141,7 @@ fun MascotaGridConDetalleRecolectadas(mascotas: List<MascotaFirebase>, baseUrl: 
         }
 
         mascotaSeleccionada?.let { mascota ->
-            val imageUrl = baseUrl.trimEnd('/') + "/static/mascotas/" +
-                    formatearNombre(mascota.nombre) + ".png"
+            val imageUrl = baseUrl.trimEnd('/') + mascota.imagen_url
 
             Box(
                 modifier = Modifier
@@ -184,8 +198,4 @@ fun MascotaGridConDetalleRecolectadas(mascotas: List<MascotaFirebase>, baseUrl: 
             }
         }
     }
-}
-
-fun formatearNombre(nombre: String): String {
-    return nombre.trim().lowercase().replace(" ", "_")
 }

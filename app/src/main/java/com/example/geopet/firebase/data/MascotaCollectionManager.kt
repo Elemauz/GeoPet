@@ -15,7 +15,7 @@ import kotlin.math.*
 
 object MascotaCollectionManager {
 
-    private const val RADIO_KM = 2
+    private const val RADIO_KM = 0.2
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
@@ -157,6 +157,56 @@ private suspend fun eliminarMascotaDelBackend(lat: Double, lon: Double) {
                 sin(dLon / 2).pow(2.0)
         val c = 2 * atan2(sqrt(a), sqrt(1 - a))
         return R * c // en kilómetros
+    }
+
+    suspend fun obtenerTodasLasMascotas(): List<MascotaFirebase> {
+        val auth = FirebaseAuth.getInstance()
+        val firestore = FirebaseFirestore.getInstance()
+
+        val usuarioId = auth.currentUser?.uid ?: return emptyList()
+
+        return try {
+            val snapshot = firestore.collection("usuarios")
+                .document(usuarioId)
+                .collection("mascotas")
+                .orderBy("hora") // Para que la última mascota esté al final
+                .get()
+                .await()
+
+            snapshot.documents.mapNotNull { doc ->
+                val nombre = doc.getString("nombre")
+                val rareza = doc.getString("rareza")
+                val imagenUrl = doc.getString("imagen_url")
+
+                if (nombre != null && rareza != null && imagenUrl != null) {
+                    MascotaFirebase(nombre, rareza, imagenUrl)
+                } else {
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
+    suspend fun contarMascotasRecolectadas(): Int {
+        val auth = FirebaseAuth.getInstance()
+        val firestore = FirebaseFirestore.getInstance()
+        val usuarioId = auth.currentUser?.uid ?: return 0
+
+        return try {
+            val snapshot = firestore.collection("usuarios")
+                .document(usuarioId)
+                .collection("mascotas")
+                .get()
+                .await()
+
+            snapshot.size() // Devuelve el número de documentos
+        } catch (e: Exception) {
+            e.printStackTrace()
+            0
+        }
     }
 
 }
